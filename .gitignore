@@ -1,0 +1,5 @@
+.playwright-cli/
+output/
+.DS_Store
+private/
+supabase/.temp/
