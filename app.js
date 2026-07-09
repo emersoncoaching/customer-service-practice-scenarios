@@ -127,7 +127,7 @@
                 return `
                   <li class="progress-item ${stateClass}">
                     <span class="progress-number">${itemIndex + 1}</span>
-                    <span>${escapeHtml(item.title)}</span>
+                    <span>${escapeHtml(scenarioLabel(itemIndex))}</span>
                   </li>
                 `;
               })
@@ -140,8 +140,7 @@
             <audio controls preload="metadata" src="${escapeAttr(scenario.audio)}"></audio>
           </div>
           <div class="scenario-body">
-            <p class="eyebrow">Scenario ${index + 1}</p>
-            <h2>${escapeHtml(scenario.title)}</h2>
+            <h2>${escapeHtml(scenarioLabel(index))}</h2>
             <p class="prompt">${escapeHtml(scenario.prompt)}</p>
             <div class="field-label" id="answer-label">Your response</div>
             <div class="rich-editor-shell">
@@ -216,8 +215,7 @@
               .map(
                 (scenario, index) => `
                 <section class="receipt-item">
-                  <p class="eyebrow">Scenario ${index + 1}</p>
-                  <h3>${escapeHtml(scenario.title)}</h3>
+                  <h3>${escapeHtml(scenarioLabel(index))}</h3>
                   ${answerBoxMarkup("Your response", getAnswerHtml(scenario.id))}
                   <button class="text-button" type="button" data-edit="${index}">Edit this response</button>
                 </section>
@@ -721,8 +719,7 @@
                 const scenario = scenarios.find((item) => item.id === response.id) || scenarios[index] || {};
                 return `
                   <section class="review-scenario">
-                    <p class="eyebrow">Scenario ${index + 1}</p>
-                    <h3>${escapeHtml(response.title || scenario.title || "Scenario")}</h3>
+                    <h3>${escapeHtml(scenarioLabel(index))}</h3>
                     <div class="audio-wrap">
                       <audio controls preload="metadata" src="${escapeAttr(scenario.audio || "")}"></audio>
                     </div>
@@ -830,6 +827,10 @@
   function normalizeResponses(rawResponses) {
     const parsed = typeof rawResponses === "string" ? JSON.parse(rawResponses) : rawResponses || {};
     return parsed.answers || [];
+  }
+
+  function scenarioLabel(index) {
+    return `Scenario ${index + 1}`;
   }
 
   function normalizeReviewStatus(value) {
