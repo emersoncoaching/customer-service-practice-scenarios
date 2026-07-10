@@ -4,6 +4,7 @@ window.CUSTOMER_SERVICE_CONFIG = {
   notifyFunctionName: "notify-customer-service-submission",
   starhireRejectFunctionName: "reject-customer-service-scenario",
   starhireLinkFunctionName: "link-customer-service-starhire-candidate",
+  starhireLookupFunctionName: "lookup-customer-service-starhire-candidate",
   starhirePositionId: "205",
   reviewerEmail: "dan@emersoncoaching.com.au",
   privateAccessPasswordHash: "21a0250ede33555c460c484ec82a10c3acb6bcce60ecd5a1b05e1e5cfc7cead2",
