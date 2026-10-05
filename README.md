@@ -11,7 +11,8 @@ Target live site: https://emersoncoaching.github.io/customer-service-practice-sc
 - The three call recordings are included in `assets/audio/`.
 - Applicants submit text responses with light rich text formatting.
 - Dan reviews submissions from the private dashboard URL stored in `private/admin-dashboard.md`.
-- Review pages can mark submissions accepted or rejected, and the dashboard groups open, accepted, and rejected submissions.
+- Review pages can mark submissions accepted, rejected or archived, and the dashboard groups submissions by those statuses and Open.
+- Archive moves an open submission to Archived without sending an email or changing StarHire. Archived submissions retain their responses and can be restored to Open from the dashboard or review page.
 - Dan-facing dashboard and review pages require a one-time private-access password in each browser.
 - New submissions can notify Dan through the `notify-customer-service-submission` Supabase Edge Function.
 
@@ -20,6 +21,8 @@ Target live site: https://emersoncoaching.github.io/customer-service-practice-sc
 The dashboard uses an unguessable `?admin=` URL and a Supabase RPC function that compares the token to a SHA-256 hash.
 
 To enable storage, the dashboard, and review-status actions in Supabase, run `supabase/schema.sql` in the Supabase SQL editor.
+
+For an existing database, apply `supabase/migrations/20261005000000_customer_service_archived_status.sql` to enable archiving.
 
 The real admin token is not committed to GitHub. Keep `private/admin-dashboard.md` local.
 

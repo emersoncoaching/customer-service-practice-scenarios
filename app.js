@@ -684,6 +684,10 @@
               <span class="summary-label">rejected</span>
             </div>
             <div>
+              <span class="summary-number">${groupedSubmissions.archived.length}</span>
+              <span class="summary-label">archived</span>
+            </div>
+            <div>
               <span class="summary-label">Latest</span>
               <span class="summary-detail">${
                 latestSubmission ? escapeHtml(formatDate(latestSubmission.created_at)) : "No submissions yet"
@@ -696,6 +700,7 @@
                   ${dashboardStatusSectionMarkup("open", groupedSubmissions.open)}
                   ${dashboardStatusSectionMarkup("accepted", groupedSubmissions.accepted)}
                   ${dashboardStatusSectionMarkup("rejected", groupedSubmissions.rejected)}
+                  ${dashboardStatusSectionMarkup("archived", groupedSubmissions.archived)}
                 </div>`
               : emptyDashboardMarkup()
           }
@@ -710,7 +715,7 @@
         groups[normalizeReviewStatus(submission.review_status)].push(submission);
         return groups;
       },
-      { open: [], accepted: [], rejected: [] }
+      { open: [], accepted: [], rejected: [], archived: [] }
     );
   }
 
@@ -770,6 +775,7 @@
         <div class="submission-actions">
           <a class="primary" href="${escapeAttr(urls.reviewUrl)}" target="_blank" rel="noopener">Open review</a>
           <a class="secondary" href="${escapeAttr(urls.applicantUrl)}" target="_blank" rel="noopener">Applicant URL</a>
+          ${archiveActionMarkup(reviewStatus, submission.review_token)}
           <button class="text-button copy-link" type="button" data-copy-url="${escapeAttr(urls.reviewUrl)}">Copy review link</button>
         </div>
       </article>
@@ -797,6 +803,39 @@
         button.textContent = "Copied";
       });
     });
+
+    document.querySelectorAll("[data-archive-status]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const card = button.closest(".submission-card");
+        const existingError = card.querySelector(".archive-error");
+        if (existingError) existingError.remove();
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = "Saving...";
+        try {
+          await updateReviewStatus(button.dataset.reviewToken, button.dataset.archiveStatus);
+          await renderAdminDashboard(token);
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = originalText;
+          const message = document.createElement("p");
+          message.className = "error archive-error";
+          message.setAttribute("role", "alert");
+          message.textContent = reviewStatusErrorMessage(error);
+          card.append(message);
+        }
+      });
+    });
+  }
+
+  function archiveActionMarkup(status, token, inReview = false) {
+    if (status !== "open" && status !== "archived") return "";
+    const nextStatus = status === "archived" ? "open" : "archived";
+    const label = status === "archived" ? "Restore to Open" : "Archive";
+    const attributes = inReview
+      ? `data-review-status="${nextStatus}"`
+      : `data-archive-status="${nextStatus}" data-review-token="${escapeAttr(token)}"`;
+    return `<button class="secondary${inReview ? " decision-button" : ""}" type="button" ${attributes}>${label}</button>`;
   }
 
   function receiptMarkup(submission, includeDanResponses, reviewToken = "") {
@@ -869,6 +908,7 @@
           <button class="secondary reject-button decision-button" type="button" data-review-status="rejected" ${
             starhireRejectedAt ? "disabled" : ""
           }>${escapeHtml(rejectButtonText)}</button>
+          ${archiveActionMarkup(reviewStatus, reviewToken, true)}
         </div>
         <p class="hint decision-message" aria-live="polite">${escapeHtml(meta.reviewHint)}</p>
         ${starhireDecisionMarkup(submission)}
@@ -925,8 +965,12 @@
         });
         button.textContent = "Saving...";
         message.classList.remove("error");
-        message.textContent =
-          nextStatus === "accepted" ? "Saving as accepted..." : "Rejecting in StarHire...";
+        message.textContent = {
+          open: "Restoring to Open...",
+          accepted: "Saving as accepted...",
+          rejected: "Rejecting in StarHire...",
+          archived: "Archiving...",
+        }[nextStatus];
 
         try {
           const updatedSubmission = await updateReviewStatus(token, nextStatus);
@@ -968,7 +1012,7 @@
 
   function normalizeReviewStatus(value) {
     const status = String(value || "").trim().toLowerCase();
-    return status === "accepted" || status === "rejected" ? status : "open";
+    return ["accepted", "rejected", "archived"].includes(status) ? status : "open";
   }
 
   function reviewStatusMeta(status) {
@@ -978,7 +1022,7 @@
         label: "Open",
         sectionTitle: "Open submissions",
         emptyText: "No open submissions.",
-        reviewHint: "Choose Accept or Reject when the decision is ready.",
+        reviewHint: "Choose Accept or Reject, or Archive without sending a rejection email.",
       },
       accepted: {
         label: "Accepted",
@@ -991,6 +1035,12 @@
         sectionTitle: "Rejected submissions",
         emptyText: "No rejected submissions.",
         reviewHint: "This submission is marked rejected. The dashboard will show it under Rejected.",
+      },
+      archived: {
+        label: "Archived",
+        sectionTitle: "Archived submissions",
+        emptyText: "No archived submissions.",
+        reviewHint: "This submission is archived. No rejection email was sent. You can restore it to Open.",
       },
     };
     return meta[normalizedStatus];

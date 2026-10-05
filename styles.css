@@ -746,6 +746,12 @@ audio {
   color: #963f4c;
 }
 
+.status-archived {
+  border-color: var(--line);
+  background: #eef1f5;
+  color: var(--muted);
+}
+
 .copy-link {
   margin-left: auto;
 }
