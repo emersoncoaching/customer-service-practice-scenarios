@@ -796,6 +796,11 @@ audio {
   margin-top: 0;
 }
 
+.card-decision-actions {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
 .decision-button {
   min-width: 112px;
 }

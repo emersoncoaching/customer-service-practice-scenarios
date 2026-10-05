@@ -13,6 +13,7 @@ Target live site: https://emersoncoaching.github.io/customer-service-practice-sc
 - Dan reviews submissions from the private dashboard URL stored in `private/admin-dashboard.md`.
 - Review pages can mark submissions accepted, rejected or archived, and the dashboard groups submissions by those statuses and Open.
 - Archive moves an open submission to Archived without sending an email or changing StarHire. Archived submissions retain their responses and can be restored to Open from the dashboard or review page.
+- Accept, Reject and Archive are available directly on the dashboard cards. Reject asks for confirmation and uses the existing StarHire rejection action.
 - Dan-facing dashboard and review pages require a one-time private-access password in each browser.
 - New submissions can notify Dan through the `notify-customer-service-submission` Supabase Edge Function.
 
